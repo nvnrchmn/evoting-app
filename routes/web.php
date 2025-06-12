@@ -44,3 +44,7 @@ Route::middleware(['auth', 'voter'])->prefix('voter')->name('voter.')->group(fun
 });
 
 Route::get('/voting/receipt/{vote}', [VotingController::class, 'downloadReceipt'])->name('voting.receipt');
+
+Route::get('/admin/decrypt/{vote}', function (\App\Models\Vote $vote) {
+    return \App\Helpers\RSAHelper::decryptWithPrivateKey($vote->encrypted_vote);
+});

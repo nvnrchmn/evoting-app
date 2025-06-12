@@ -1,13 +1,13 @@
 <?php
 namespace App\Http\Controllers\Voter;
 
+use App\Helpers\RSAHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Election;
 use App\Models\Vote;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 
 class VotingController extends Controller
 {
@@ -37,7 +37,7 @@ class VotingController extends Controller
             return back()->with('error', 'Tidak ada pemilu yang sedang berlangsung.');
         }
 
-        $encryptedVote = Crypt::encryptString($request->candidate_id);
+        $encryptedVote = RSAHelper::encryptWithPublicKey($request->candidate_id);
 
         Vote::create([
             'user_id'        => $user->id,
