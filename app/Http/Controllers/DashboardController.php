@@ -1,38 +1,54 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Candidate;
-use App\Models\Vote;
-use Illuminate\View\Factory;
+use App\Models\Election;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): Factory | View
+    public function index(Request $request): View
     {
-        $totalVotes = Vote::count();
-        $candidates = Candidate::with('persons')->get();
+        $elections = Election::all();
 
-        $labels  = [];
-        $data    = [];
-        $summary = [];
+        $selectedElection = $request->election_id
+        ? Election::find($request->election_id)
+        : Election::where('status', 'open')->latest()->first();
+
+        if (! $selectedElection) {
+            return view('dashboard', [
+                'elections'        => $elections,
+                'selectedElection' => null,
+                'labels'           => [],
+                'data'             => [],
+                'summary'          => [],
+            ]);
+        }
+
+        $candidates    = $selectedElection->candidates()->with('persons')->get();
+        $totalEligible = $selectedElection->users()->count();
+        $labels        = $data        = $summary        = [];
 
         foreach ($candidates as $candidate) {
             $name       = $candidate->persons->pluck('name')->implode(' & ');
-            $count      = Vote::where('candidate_id', $candidate->id)->count();
-            $percentage = $totalVotes > 0 ? round(($count / $totalVotes) * 100, 2) : 0;
+            $votes      = $candidate->votes()->count();
+            $percentage = $totalEligible > 0 ? round(($votes / $totalEligible) * 100, 2) : 0;
 
-            $labels[] = $name;
-            $data[]   = $percentage;
-
-            // Untuk tampilan awal
+            $labels[]  = $name;
+            $data[]    = $percentage;
             $summary[] = [
                 'name'       => $name,
-                'votes'      => $count,
+                'voteCount'  => $votes,
                 'percentage' => $percentage,
             ];
         }
 
-        return view('dashboard', compact('labels', 'data', 'summary'));
+        return view('dashboard', compact(
+            'elections',
+            'selectedElection',
+            'labels',
+            'data',
+            'summary'
+        ));
     }
 }

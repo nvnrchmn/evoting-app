@@ -31,7 +31,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            max-height: 100vh;
         }
 
         .certificate-container {
@@ -65,9 +65,9 @@
         }
 
         .logo {
-            width: 240px;
+            width: 120px;
             /* Logo diperbesar 3x */
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             display: block;
             margin-left: auto;
             margin-right: auto;
@@ -92,7 +92,7 @@
             background-color: #f9f9f9;
             border: 1px solid #eee;
             border-radius: 8px;
-            padding: 20px 30px;
+            padding: 20px 20px;
             /* Padding sedikit dikurangi */
             margin-bottom: 35px;
             text-align: left;
@@ -181,6 +181,10 @@
                 <span class="data-label">ID Kandidat:</span>
                 <span class="data-value">{{ $vote->candidate_id }}</span>
             </div> --}}
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <p>Scan QR Code untuk melihat detail hasil voting:</p>
+            <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code">
         </div>
 
         <div class="acknowledgement">

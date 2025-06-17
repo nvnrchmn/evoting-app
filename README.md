@@ -1,66 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🗳️ E-Voting App - Laravel 12
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi **E-Voting Berbasis Web** menggunakan Laravel 12. Proyek ini ditujukan untuk pelaksanaan pemilihan ketua dan wakil secara digital dengan sistem **multi-role**, **enkripsi suara (RSA)**, serta fitur **pengunduhan bukti voting** dan **grafik hasil suara**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   ✅ **Autentikasi Multi-Role (Admin & User)**
+-   ✅ **Voting system kandidat ketua & wakil**
+-   ✅ **Enkripsi suara dengan RSA Public Key Encryption**
+-   ✅ **Unduh bukti voting dalam bentuk PDF (berisi timestamp)**
+-   ✅ **Dashboard Admin & User dengan grafik hasil voting**
+-   ✅ **Notifikasi hasil voting dan status pemilihan**
+-   ✅ **Manajemen kandidat & pemilihan (oleh admin)**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🧱 Teknologi yang Digunakan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+-   Laravel 12
+-   PHP 8.2+
+-   MySQL / MariaDB
+-   [DomPDF](https://github.com/barryvdh/laravel-dompdf) untuk PDF export
+-   Chart.js untuk grafik visual
+-   RSA Public/Private Key Encryption (manual OpenSSL)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📦 Instalasi & Setup
 
-## Laravel Sponsors
+1. **Clone repositori**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+    ```bash
+    git clone https://github.com/username/evoting-app.git
+    cd evoting-app
+    ```
 
-### Premium Partners
+2. **Install dependency**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+    ```bash
+    composer install
+    npm install && npm run dev
+    ```
 
-## Contributing
+3. **Copy file `.env` & konfigurasi**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
-## Code of Conduct
+4. **Atur koneksi database di `.env`**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Migrasi & seed database**
 
-## Security Vulnerabilities
+    ```bash
+    php artisan migrate --seed
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Generate kunci RSA untuk enkripsi**
 
-## License
+    ```bash
+    php artisan rsa:generate
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    > Ini akan menghasilkan `storage/app/keys/public.pem` dan `private.pem`
+
+7. **Jalankan aplikasi**
+    ```bash
+    php artisan serve
+    ```
+
+---
+
+## 🔑 Akun Dummy (Seeder)
+
+| Role  | Email             | Password |
+| ----- | ----------------- | -------- |
+| Admin | admin@example.com | password |
+| User  | user@example.com  | password |
+
+---
+
+## 📝 Struktur Folder Penting
+
+-   `app/Http/Controllers/` — Logic controller utama
+-   `resources/views/` — Blade template (admin/user/voting)
+-   `database/seeders/` — Data dummy untuk kandidat dan user
+-   `storage/app/keys/` — RSA public/private key
+-   `routes/web.php` — Routing web Laravel
+
+---
+
+## 📄 Cara Menggunakan
+
+### Sebagai User:
+
+-   Login sebagai user
+-   Pilih kandidat dan vote
+-   Sistem akan mengenkripsi suara menggunakan RSA
+-   Setelah voting, kamu bisa mengunduh **bukti voting (PDF)**
+
+### Sebagai Admin:
+
+-   Kelola kandidat dan data voting
+-   Lihat hasil voting dalam bentuk **grafik batang**
+-   Kelola status voting (open/close)
+
+---
+
+## 🔒 Keamanan Suara
+
+Aplikasi ini menggunakan **RSA Public Key Encryption** untuk mengenkripsi suara:
+
+-   **Public key** digunakan untuk mengenkripsi saat user voting
+-   **Private key** hanya dimiliki server untuk dekripsi saat validasi
+
+---
+
+## 📊 Grafik Hasil Voting
+
+Dashboard Admin & User menampilkan grafik batang berdasarkan suara yang masuk, dalam bentuk **persentase (%)**, lengkap dengan nama pasangan.
+
+---
+
+## ✍️ Kontribusi
+
+Pull request dan masukan sangat terbuka!
+
+1. Fork project
+2. Buat branch fitur
+3. Commit dan push
+4. Ajukan PR
+
+---
+
+## 📃 Lisensi
+
+Proyek ini berlisensi **MIT License**. Silakan digunakan untuk keperluan akademik maupun produksi dengan kredit yang sesuai.
+
+---
+
+## 🙋 Kontak
+
+Dikembangkan oleh [Nova Nurachman]  
+📧 Email: nv.nrchmn@gmail.com  
+📍 Proyek untuk tugas Web Programming II

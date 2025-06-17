@@ -52,4 +52,24 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+    public function elections()
+    {
+        return $this->belongsToMany(Election::class);
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
+    }
+    public function accessibleElections()
+    {
+        return Election::whereHas('groups', function ($query) {
+            $query->whereIn('groups.id', $this->groups->pluck('id'));
+        })->get();
+    }
+    public function hasVotedInElection($electionId)
+    {
+        return $this->votes()->where('election_id', $electionId)->exists();
+    }
+
 }

@@ -18,4 +18,28 @@ class Election extends Model
     {
         return $this->hasMany(Vote::class);
     }
+    // public function users()
+    // {
+    //     return $this->belongsToMany(User::class);
+    // }
+    // public function group()
+    // {
+    //     return $this->belongsToMany(Group::class);
+    // }
+
+    // public function groups()
+    // {
+    //     return $this->belongsToMany(\App\Models\Group::class, 'election_group');
+    // }
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
+    }
+
+// Ambil users dari semua grup yg terdaftar
+    public function users()
+    {
+        return $this->groups->flatMap->users->unique('id');
+    }
+
 }

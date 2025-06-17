@@ -23,9 +23,9 @@
                     class="space-y-6">
                     @csrf
 
-                    {{-- Pilih Pemilu --}}
+                    {{-- Pilih voting --}}
                     <div>
-                        <label for="election_id" :value="'Pilih Pemilu'" />
+                        <label for="election_id" :value="'Pilih voting'" />
                         <select name="election_id" id="election_id" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($elections as $election)
