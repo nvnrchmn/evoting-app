@@ -1,29 +1,31 @@
-# 🗳️ E-Voting App - Laravel 12
+# 🗳️ E-Voting App - Laravel 10
 
-Aplikasi **E-Voting Berbasis Web** menggunakan Laravel 12. Proyek ini ditujukan untuk pelaksanaan pemilihan ketua dan wakil secara digital dengan sistem **multi-role**, **enkripsi suara (RSA)**, serta fitur **pengunduhan bukti voting** dan **grafik hasil suara**.
+Aplikasi **E-Voting Berbasis Web** yang dibangun menggunakan Laravel 10. Aplikasi ini dirancang untuk memfasilitasi proses pemilihan ketua dan wakil secara digital, dengan fitur **multi-role**, **enkripsi suara (RSA)**, serta **pengunduhan bukti voting** dan **grafik hasil suara**.
 
 ---
 
 ## 🚀 Fitur Utama
 
--   ✅ **Autentikasi Multi-Role (Admin & User)**
--   ✅ **Voting system kandidat ketua & wakil**
--   ✅ **Enkripsi suara dengan RSA Public Key Encryption**
--   ✅ **Unduh bukti voting dalam bentuk PDF (berisi timestamp)**
--   ✅ **Dashboard Admin & User dengan grafik hasil voting**
--   ✅ **Notifikasi hasil voting dan status pemilihan**
--   ✅ **Manajemen kandidat & pemilihan (oleh admin)**
+-   ✅ Autentikasi & otorisasi **multi-role** (Admin & User)
+-   ✅ Proses voting ketua & wakil berbasis web
+-   ✅ **RSA Public Key Encryption** untuk enkripsi suara
+-   ✅ **Download bukti voting (PDF)** disertai waktu voting
+-   ✅ **Dashboard** dengan grafik suara (Chart.js)
+-   ✅ Manajemen kandidat, voting, dan grup pemilih oleh Admin
+-   ✅ Filter pemilih berdasarkan grup tertentu
+-   ✅ Responsive design (mobile & desktop)
 
 ---
 
 ## 🧱 Teknologi yang Digunakan
 
--   Laravel 12
+-   Laravel 10
 -   PHP 8.2+
 -   MySQL / MariaDB
--   [DomPDF](https://github.com/barryvdh/laravel-dompdf) untuk PDF export
--   Chart.js untuk grafik visual
--   RSA Public/Private Key Encryption (manual OpenSSL)
+-   [DomPDF](https://github.com/barryvdh/laravel-dompdf)
+-   Chart.js
+-   OpenSSL (RSA Key Pair)
+-   Blade Component (x-\*) Layout
 
 ---
 
@@ -43,14 +45,14 @@ Aplikasi **E-Voting Berbasis Web** menggunakan Laravel 12. Proyek ini ditujukan 
     npm install && npm run dev
     ```
 
-3. **Copy file `.env` & konfigurasi**
+3. **Salin file `.env` dan generate key**
 
     ```bash
     cp .env.example .env
     php artisan key:generate
     ```
 
-4. **Atur koneksi database di `.env`**
+4. **Atur koneksi database** di `.env` sesuai konfigurasi lokal
 
 5. **Migrasi & seed database**
 
@@ -58,13 +60,13 @@ Aplikasi **E-Voting Berbasis Web** menggunakan Laravel 12. Proyek ini ditujukan 
     php artisan migrate --seed
     ```
 
-6. **Generate kunci RSA untuk enkripsi**
+6. **Generate kunci RSA untuk enkripsi suara**
 
     ```bash
     php artisan rsa:generate
     ```
 
-    > Ini akan menghasilkan `storage/app/keys/public.pem` dan `private.pem`
+    > Akan menghasilkan `storage/app/keys/public.pem` dan `private.pem`
 
 7. **Jalankan aplikasi**
     ```bash
@@ -73,76 +75,85 @@ Aplikasi **E-Voting Berbasis Web** menggunakan Laravel 12. Proyek ini ditujukan 
 
 ---
 
-## 🔑 Akun Dummy (Seeder)
+## 🔐 Akun Dummy (Seeder)
 
 | Role  | Email             | Password |
 | ----- | ----------------- | -------- |
 | Admin | admin@example.com | password |
-| User  | user@example.com  | password |
 
 ---
 
-## 📝 Struktur Folder Penting
+## 📄 Struktur Direktori Penting
 
--   `app/Http/Controllers/` — Logic controller utama
--   `resources/views/` — Blade template (admin/user/voting)
--   `database/seeders/` — Data dummy untuk kandidat dan user
--   `storage/app/keys/` — RSA public/private key
+-   `app/Http/Controllers/` — Kontroler utama (Admin, Voter, Voting)
+-   `resources/views/` — Blade templates (UI Admin & User)
 -   `routes/web.php` — Routing web Laravel
+-   `storage/app/keys/` — RSA Public & Private Key
+-   `database/seeders/` — Seeder data awal (kandidat, grup, user)
+-   `app/Helpers/RSAHelper.php` — Utility helper untuk enkripsi suara
 
 ---
 
-## 📄 Cara Menggunakan
+## 👥 Alur Penggunaan
 
-### Sebagai User:
+### 👤 Sebagai User:
 
--   Login sebagai user
--   Pilih kandidat dan vote
--   Sistem akan mengenkripsi suara menggunakan RSA
--   Setelah voting, kamu bisa mengunduh **bukti voting (PDF)**
+1. Login sebagai user terdaftar.
+2. Lihat daftar pemilihan yang tersedia (hanya `open`).
+3. Lakukan voting untuk pasangan kandidat.
+4. Suara dienkripsi menggunakan RSA Public Key.
+5. Unduh bukti voting (PDF) sebagai tanda partisipasi.
 
-### Sebagai Admin:
+### 🛠️ Sebagai Admin:
 
--   Kelola kandidat dan data voting
--   Lihat hasil voting dalam bentuk **grafik batang**
--   Kelola status voting (open/close)
+1. Login sebagai admin.
+2. Kelola daftar kandidat, voting, dan grup.
+3. Atur status voting (open/closed).
+4. Lihat hasil voting secara real-time dalam grafik.
 
 ---
 
 ## 🔒 Keamanan Suara
 
-Aplikasi ini menggunakan **RSA Public Key Encryption** untuk mengenkripsi suara:
+Setiap suara dienkripsi menggunakan **RSA Public Key Encryption**:
 
--   **Public key** digunakan untuk mengenkripsi saat user voting
--   **Private key** hanya dimiliki server untuk dekripsi saat validasi
+-   🔐 **Public Key** digunakan saat user melakukan voting.
+-   🔓 **Private Key** digunakan server untuk membaca hasil vote.
 
----
-
-## 📊 Grafik Hasil Voting
-
-Dashboard Admin & User menampilkan grafik batang berdasarkan suara yang masuk, dalam bentuk **persentase (%)**, lengkap dengan nama pasangan.
+Dengan metode ini, integritas dan kerahasiaan suara pengguna tetap terjamin.
 
 ---
 
-## ✍️ Kontribusi
+## 📊 Visualisasi Hasil Voting
 
-Pull request dan masukan sangat terbuka!
+Dashboard menyajikan:
 
-1. Fork project
-2. Buat branch fitur
-3. Commit dan push
-4. Ajukan PR
+-   Grafik batang (bar chart) dengan Chart.js
+-   Persentase suara tiap kandidat
+-   Statistik total pemilih aktif per voting
+
+---
+
+## 💡 Kontribusi
+
+Kontribusi sangat diterima!
+
+1. Fork repositori
+2. Buat branch baru untuk fitur atau perbaikan
+3. Commit & push
+4. Ajukan pull request
 
 ---
 
 ## 📃 Lisensi
 
-Proyek ini berlisensi **MIT License**. Silakan digunakan untuk keperluan akademik maupun produksi dengan kredit yang sesuai.
+Aplikasi ini berada di bawah lisensi **MIT License**.  
+Silakan digunakan untuk keperluan pembelajaran, pengembangan, atau produksi dengan memberikan atribusi yang sesuai.
 
 ---
 
-## 🙋 Kontak
+## 🙋 Tentang Developer
 
-Dikembangkan oleh [Nova Nurachman]  
+Dikembangkan oleh **Nova Nurachman**  
 📧 Email: nv.nrchmn@gmail.com  
-📍 Proyek untuk tugas Web Programming II
+🎓 Proyek ini disusun sebagai bagian dari **Tugas Akhir Web Programming II**
