@@ -7,21 +7,23 @@
 
     <div class="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white p-6 rounded shadow">
-            <div class="flex justify-between items-center mb-4">
+            <!-- Header Atas -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <h3 class="text-lg font-bold text-gray-800">Daftar Grup</h3>
                 <a href="{{ route('admin.groups.create') }}"
-                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm w-full md:w-auto text-center">
                     + Tambah Grup
                 </a>
             </div>
 
+            <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                     <thead class="bg-gray-50 text-gray-600 text-left">
                         <tr>
-                            <th class="px-4 py-2">Nama Grup</th>
-                            <th class="px-4 py-2">Jumlah Anggota</th>
-                            <th class="px-4 py-2">Aksi</th>
+                            <th class="px-4 py-2 whitespace-nowrap">Nama Grup</th>
+                            <th class="px-4 py-2 whitespace-nowrap">Jumlah Anggota</th>
+                            <th class="px-4 py-2 whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -29,16 +31,24 @@
                             <tr>
                                 <td class="px-4 py-2">{{ $group->name }}</td>
                                 <td class="px-4 py-2">{{ $group->users->count() }} orang</td>
-                                <td class="px-4 py-2 space-x-2">
-                                    <a href="{{ route('admin.groups.edit', $group->id) }}"
-                                        class="text-blue-600 hover:underline">Edit</a>
-                                    <form action="{{ route('admin.groups.destroy', $group->id) }}" method="POST"
-                                        class="inline" onsubmit="return confirm('Yakin ingin menghapus grup ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-red-600 hover:underline">Hapus</button>
-                                    </form>
+                                <td class="px-4 py-2">
+                                    <div class="flex flex-wrap gap-2">
+                                        <x-button type="button" variant="primary" class="min-w-[80px] text-center"
+                                            onclick="window.location='{{ route('admin.groups.edit', $group->id) }}'">
+                                            Edit
+                                        </x-button>
+
+                                        <form action="{{ route('admin.groups.destroy', $group->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin ingin menghapus grup ini?')"
+                                            class="inline-block">
+                                            @csrf @method('DELETE')
+                                            <x-button type="submit" variant="danger" class="min-w-[80px] text-center">
+                                                Hapus
+                                            </x-button>
+                                        </form>
+                                    </div>
                                 </td>
+
                             </tr>
                         @empty
                             <tr>

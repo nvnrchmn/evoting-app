@@ -9,11 +9,22 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $elections = Election::all();
+        $user = auth()->user();
 
+        // Cek apakah user adalah admin
+        if ($user->role === 'admin') {
+            // Admin bisa melihat semua election
+            $elections = Election::all();
+        } else {
+            $elections = Election::where('status', 'open')
+                ->whereHas('groups.users', function ($query) {
+                    $query->where('users.id', auth()->id());
+                })
+                ->get();
+        }
         $selectedElection = $request->election_id
-        ? Election::find($request->election_id)
-        : Election::where('status', 'open')->latest()->first();
+        ? $elections->firstWhere('id', $request->election_id)
+        : $elections->first();
 
         if (! $selectedElection) {
             return view('dashboard', [
@@ -25,9 +36,19 @@ class DashboardController extends Controller
             ]);
         }
 
-        $candidates    = $selectedElection->candidates()->with('persons')->get();
-        $totalEligible = $selectedElection->users()->count();
-        $labels        = $data        = $summary        = [];
+        // Ambil kandidat beserta person-nya
+        $candidates = $selectedElection->candidates()->with('persons')->get();
+
+        // Ambil total user yang terkait election melalui group
+        $totalEligible = $selectedElection->groups()
+            ->with('users')
+            ->get()
+            ->flatMap->users
+            ->unique('id')
+            ->count();
+
+        // Siapkan data grafik dan ringkasan
+        $labels = $data = $summary = [];
 
         foreach ($candidates as $candidate) {
             $name       = $candidate->persons->pluck('name')->implode(' & ');

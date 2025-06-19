@@ -5,13 +5,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Candidate;
 use App\Models\Election;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateController extends Controller
 {
     public function index()
     {
+        // $candidates = Candidate::with(['election', 'persons'])->get();
+        // dd($candidates);
+        // dd($candidates->first()->relations);
+        // return view('admin.candidates.index', compact('candidates'));
+
         $candidates = Candidate::with(['election', 'persons'])->get();
+
+        // foreach ($candidates as $c) {
+        //     dump($c->id, $c->persons); // lihat isinya langsung
+        // }
+
         return view('admin.candidates.index', compact('candidates'));
+
     }
 
     public function create()
@@ -22,7 +34,7 @@ class CandidateController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'election_id'  => 'required|exists:elections,id',
             'vision'       => 'required',
             'mission'      => 'required',
@@ -35,29 +47,29 @@ class CandidateController extends Controller
             'deputy_photo' => 'nullable|image',
         ]);
 
-        // Simpan pasangan kandidat
-        $photoPath = $request->file('photo')?->store('candidates', 'public');
+        // Upload foto kandidat
+        $photoPath = $this->uploadFile($request, 'photo', 'candidates');
+
+        // Simpan kandidat
         $candidate = Candidate::create([
-            'election_id' => $request->election_id,
-            'vision'      => $request->vision,
-            'mission'     => $request->mission,
+            'election_id' => $validated['election_id'],
+            'name'        => $validated['leader_name'] . ' & ' . $validated['deputy_name'],
+            'vision'      => $validated['vision'],
+            'mission'     => $validated['mission'],
             'photo'       => $photoPath,
         ]);
 
-        // Simpan ketua
-        $leaderPhoto = $request->file('leader_photo')?->store('persons', 'public');
+        // Simpan ketua dan wakil
         $candidate->persons()->create([
-            'name'     => $request->leader_name,
+            'name'     => $validated['leader_name'],
             'position' => 'ketua',
-            'photo'    => $leaderPhoto,
+            'photo'    => $this->uploadFile($request, 'leader_photo', 'persons'),
         ]);
 
-        // Simpan wakil
-        $deputyPhoto = $request->file('deputy_photo')?->store('persons', 'public');
         $candidate->persons()->create([
-            'name'     => $request->deputy_name,
+            'name'     => $validated['deputy_name'],
             'position' => 'wakil',
-            'photo'    => $deputyPhoto,
+            'photo'    => $this->uploadFile($request, 'deputy_photo', 'persons'),
         ]);
 
         return redirect()->route('admin.candidates.index')->with('success', 'Kandidat berhasil ditambahkan.');
@@ -67,18 +79,17 @@ class CandidateController extends Controller
     {
         $candidate = Candidate::with('persons')->findOrFail($id);
         $elections = Election::all();
-
-        $leader = $candidate->persons->firstWhere('position', 'ketua');
-        $deputy = $candidate->persons->firstWhere('position', 'wakil');
+        $leader    = $candidate->persons->firstWhere('position', 'ketua');
+        $deputy    = $candidate->persons->firstWhere('position', 'wakil');
 
         return view('admin.candidates.edit', compact('candidate', 'elections', 'leader', 'deputy'));
     }
 
     public function update(Request $request, $id)
     {
-        $candidate = Candidate::findOrFail($id);
+        $candidate = Candidate::with('persons')->findOrFail($id);
 
-        $request->validate([
+        $validated = $request->validate([
             'election_id'  => 'required|exists:elections,id',
             'vision'       => 'required',
             'mission'      => 'required',
@@ -91,31 +102,37 @@ class CandidateController extends Controller
             'deputy_photo' => 'nullable|image',
         ]);
 
-        // Update kandidat
+        // Update foto jika ada
         if ($request->hasFile('photo')) {
-            $candidate->photo = $request->file('photo')->store('candidates', 'public');
+            $this->deleteFile($candidate->photo);
+            $candidate->photo = $this->uploadFile($request, 'photo', 'candidates');
         }
 
+        // Update kandidat
         $candidate->update([
-            'election_id' => $request->election_id,
-            'vision'      => $request->vision,
-            'mission'     => $request->mission,
+            'election_id' => $validated['election_id'],
+            'name'        => $validated['leader_name'] . ' & ' . $validated['deputy_name'],
+            'vision'      => $validated['vision'],
+            'mission'     => $validated['mission'],
+            'photo'       => $candidate->photo, // updated if changed
         ]);
 
-        // Update ketua dan wakil
+        // Update ketua & wakil
         foreach ($candidate->persons as $person) {
             if ($person->position === 'ketua') {
-                $person->name = $request->leader_name;
+                $person->name = $validated['leader_name'];
                 if ($request->hasFile('leader_photo')) {
-                    $person->photo = $request->file('leader_photo')->store('persons', 'public');
+                    $this->deleteFile($person->photo);
+                    $person->photo = $this->uploadFile($request, 'leader_photo', 'persons');
                 }
                 $person->save();
             }
 
             if ($person->position === 'wakil') {
-                $person->name = $request->deputy_name;
+                $person->name = $validated['deputy_name'];
                 if ($request->hasFile('deputy_photo')) {
-                    $person->photo = $request->file('deputy_photo')->store('persons', 'public');
+                    $this->deleteFile($person->photo);
+                    $person->photo = $this->uploadFile($request, 'deputy_photo', 'persons');
                 }
                 $person->save();
             }
@@ -123,27 +140,38 @@ class CandidateController extends Controller
 
         return redirect()->route('admin.candidates.index')->with('success', 'Kandidat berhasil diperbarui.');
     }
+
     public function destroy($id)
     {
-        $candidate = Candidate::findOrFail($id);
+        $candidate = Candidate::with('persons')->findOrFail($id);
 
-        // Hapus foto utama kandidat (jika ada)
-        if ($candidate->photo) {
-            \Storage::disk('public')->delete($candidate->photo);
-        }
+        // Hapus foto kandidat
+        $this->deleteFile($candidate->photo);
 
-        // Hapus foto orang (ketua & wakil)
+        // Hapus foto ketua & wakil
         foreach ($candidate->persons as $person) {
-            if ($person->photo) {
-                \Storage::disk('public')->delete($person->photo);
-            }
+            $this->deleteFile($person->photo);
         }
 
-        // Hapus relasi dan kandidat
+        // Hapus data
         $candidate->persons()->delete();
         $candidate->delete();
 
         return redirect()->route('admin.candidates.index')->with('success', 'Kandidat berhasil dihapus.');
     }
 
+    // Helpers
+    private function uploadFile(Request $request, string $field, string $path)
+    {
+        return $request->hasFile($field)
+        ? $request->file($field)->store($path, 'public')
+        : null;
+    }
+
+    private function deleteFile(?string $filePath)
+    {
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
+        }
+    }
 }

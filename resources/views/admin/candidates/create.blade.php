@@ -1,19 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Tambah Pasangan Kandidat
-        </h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Tambah Pasangan Kandidat</h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+    <div class="py-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white shadow rounded-lg p-6 space-y-6">
 
+                {{-- Error Alert --}}
                 @if ($errors->any())
-                    <div class="bg-red-100 text-red-700 p-4 mb-4 rounded">
-                        <ul class="list-disc list-inside">
+                    <div class="bg-red-100 text-red-700 p-4 rounded">
+                        <ul class="list-disc pl-5">
                             @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
+                                <li class="text-sm">{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
@@ -23,10 +22,11 @@
                     class="space-y-6">
                     @csrf
 
-                    {{-- Pilih voting --}}
+                    {{-- Voting Selector --}}
                     <div>
-                        <label for="election_id" :value="'Pilih voting'" />
-                        <select name="election_id" id="election_id" class="w-full border rounded px-3 py-2">
+                        <label for="election_id" class="block font-medium text-gray-700 mb-1">Pilih Voting</label>
+                        <select name="election_id" id="election_id" required
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
                             <option value="">-- Pilih --</option>
                             @foreach ($elections as $election)
                                 <option value="{{ $election->id }}" {{ old('election_id') == $election->id ? 'selected' : '' }}>
@@ -36,69 +36,71 @@
                         </select>
                     </div>
 
-                    {{-- Foto pasangan --}}
+                    {{-- Foto Pasangan --}}
                     <div>
-                        <label for="photo" :value="'Foto Pasangan (Opsional)'" />
+                        <label for="photo" class="block font-medium text-gray-700 mb-1">Foto Pasangan (Opsional)</label>
                         <input type="file" name="photo" id="photo" accept="image/*"
-                            class="w-full border rounded px-3 py-2">
+                            class="w-full border-gray-300 rounded-md shadow-sm">
                     </div>
 
                     {{-- Visi & Misi --}}
                     <div>
-                        <h3 class="text-xl font-bold">Visi</h3>
-                        <label for="vision" :value="'Visi'" />
+                        <label for="vision" class="block font-medium text-gray-700 mb-1">Visi</label>
                         <textarea name="vision" id="vision" rows="3"
-                            class="w-full border rounded px-3 py-2">{{ old('vision') }}</textarea>
+                            class="w-full border-gray-300 rounded-md shadow-sm">{{ old('vision') }}</textarea>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold">Misi</h3>
-                        <label for="mission" :value="'Misi'" />
+                        <label for="mission" class="block font-medium text-gray-700 mb-1">Misi</label>
                         <textarea name="mission" id="mission" rows="3"
-                            class="w-full border rounded px-3 py-2">{{ old('mission') }}</textarea>
+                            class="w-full border-gray-300 rounded-md shadow-sm">{{ old('mission') }}</textarea>
                     </div>
 
-                    <hr class="my-4">
+                    <hr class="my-6">
 
                     {{-- Ketua --}}
-                    <h3 class="text-xl font-bold">Data Ketua</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <h3 class="text-lg font-bold text-gray-800">Data Ketua</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="leader_name" :value="'Nama Ketua'" />
-                            <input id="leader_name" class="block mt-1 w-full" type="text" name="leader_name"
-                                value="{{ old('leader_name') }}" />
+                            <label for="leader_name" class="block font-medium text-gray-700 mb-1">Nama Ketua</label>
+                            <input type="text" name="leader_name" id="leader_name" value="{{ old('leader_name') }}"
+                                class="w-full border-gray-300 rounded-md shadow-sm">
                         </div>
                         <div>
-                            <label for="leader_photo" :value="'Foto Ketua (Opsional)'" />
+                            <label for="leader_photo" class="block font-medium text-gray-700 mb-1">Foto Ketua
+                                (Opsional)</label>
                             <input type="file" name="leader_photo" id="leader_photo" accept="image/*"
-                                class="w-full border rounded px-3 py-2">
+                                class="w-full border-gray-300 rounded-md shadow-sm">
                         </div>
                     </div>
 
                     {{-- Wakil --}}
-                    <h3 class="text-xl font-bold mt-6">Data Wakil</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <h3 class="text-lg font-bold text-gray-800 mt-6">Data Wakil</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="deputy_name" :value="'Nama Wakil'" />
-                            <input id="deputy_name" class="block mt-1 w-full" type="text" name="deputy_name"
-                                value="{{ old('deputy_name') }}" />
+                            <label for="deputy_name" class="block font-medium text-gray-700 mb-1">Nama Wakil</label>
+                            <input type="text" name="deputy_name" id="deputy_name" value="{{ old('deputy_name') }}"
+                                class="w-full border-gray-300 rounded-md shadow-sm">
                         </div>
                         <div>
-                            <label for="deputy_photo" :value="'Foto Wakil (Opsional)'" />
+                            <label for="deputy_photo" class="block font-medium text-gray-700 mb-1">Foto Wakil
+                                (Opsional)</label>
                             <input type="file" name="deputy_photo" id="deputy_photo" accept="image/*"
-                                class="w-full border rounded px-3 py-2">
+                                class="w-full border-gray-300 rounded-md shadow-sm">
                         </div>
                     </div>
 
-                    {{-- Submit --}}
-                    <div class="mt-6">
-                        <x-primary-button>
+                    {{-- Tombol --}}
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6">
+                        <x-button variant="primary" class="w-full sm:w-auto text-center">
                             Simpan Kandidat
-                        </x-primary-button>
-                        <a href="{{ route('admin.candidates.index') }}"
-                            class="ml-4 text-gray-600 hover:underline">Batal</a>
+                            </x-primary-button>
+
+                            <a href="{{ route('admin.candidates.index') }}"
+                                class="text-sm text-gray-600 hover:underline text-center">
+                                Batal & Kembali
+                            </a>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>

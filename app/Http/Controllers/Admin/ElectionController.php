@@ -2,45 +2,37 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreElectionRequest;
+use App\Http\Requests\UpdateElectionRequest;
 use App\Models\Election;
 use App\Models\Group;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ElectionController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $elections = Election::with('groups')->get();
         return view('admin.elections.index', compact('elections'));
     }
 
-    public function create()
+    public function create(): View
     {
         $groups         = Group::all();
         $selectedGroups = []; // default kosong saat create
         return view('admin.elections.create', compact('groups', 'selectedGroups'));
     }
 
-    public function store(Request $request)
+    public function store(StoreElectionRequest $request): RedirectResponse
     {
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status'      => 'required|in:open,closed',
-            'groups'      => 'nullable|array',
-            'groups.*'    => 'exists:groups,id',
-        ]);
-
         $election = Election::create($request->only('title', 'description', 'status'));
-
-        if ($request->filled('groups')) {
-            $election->groups()->sync($request->groups);
-        }
+        $this->syncGroups($election, $request->groups);
 
         return redirect()->route('admin.elections.index')->with('success', 'Election berhasil ditambahkan.');
     }
 
-    public function edit(Election $election)
+    public function edit(Election $election): View
     {
         $groups         = Group::all();
         $selectedGroups = $election->groups->pluck('id')->toArray();
@@ -48,28 +40,24 @@ class ElectionController extends Controller
         return view('admin.elections.edit', compact('election', 'groups', 'selectedGroups'));
     }
 
-    public function update(Request $request, Election $election)
+    public function update(UpdateElectionRequest $request, Election $election): RedirectResponse
     {
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status'      => 'required|in:open,closed',
-            'groups'      => 'nullable|array',
-            'groups.*'    => 'exists:groups,id',
-        ]);
-
         $election->update($request->only('title', 'description', 'status'));
-
-        $election->groups()->sync($request->groups ?? []);
+        $this->syncGroups($election, $request->groups);
 
         return redirect()->route('admin.elections.index')->with('success', 'Election berhasil diperbarui.');
     }
 
-    public function destroy(Election $election)
+    public function destroy(Election $election): RedirectResponse
     {
         $election->groups()->detach();
         $election->delete();
 
         return redirect()->route('admin.elections.index')->with('success', 'Election berhasil dihapus.');
+    }
+
+    private function syncGroups(Election $election, ?array $groupIds): void
+    {
+        $election->groups()->sync($groupIds ?? []);
     }
 }

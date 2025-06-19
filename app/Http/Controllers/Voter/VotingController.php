@@ -17,21 +17,33 @@ use Illuminate\Support\Facades\Auth;
 class VotingController extends Controller
 {
     /**
-     * Menampilkan daftar election yg dapat diikuti oleh user berdasarkan group
+     * Menampilkan daftar election yang dapat diikuti oleh user berdasarkan group
      */
-    public function index(Election $election)
+    public function index()
+    {
+        $user      = auth()->user();
+        $elections = $user->elections()->load('candidates.persons');
+        return view('voter.voting.index', compact('elections'));
+
+    }
+
+    /**
+     * Menampilkan halaman voting untuk sebuah election
+     */
+    public function show(Election $election)
     {
         $user = auth()->user();
 
-        // Pastikan user memang boleh akses election ini
         if (! $election->groups()->whereIn('groups.id', $user->groups->pluck('id'))->exists()) {
-            return redirect()->back()->with('error', 'Anda tidak berhak mengikuti pemilu ini.');
+            return redirect()->route('voter.voting.index')->with('error', 'Anda tidak berhak mengikuti pemilu ini.');
         }
 
         $candidates = $election->candidates()->with('persons')->get();
-        $vote       = $user->votes()->where('election_id', $election->id)->first();
 
-        return view('voting.index', compact('election', 'candidates', 'vote'));
+        $vote     = $user->votes()->where('election_id', $election->id)->first();
+        $hasVoted = $vote !== null;
+
+        return view('voter.voting.show', compact('election', 'candidates', 'vote', 'hasVoted'));
     }
 
     /**
@@ -44,25 +56,17 @@ class VotingController extends Controller
         ]);
 
         $user      = Auth::user();
-        $candidate = Candidate::with('election.groups.users')->findOrFail($request->candidate_id);
+        $candidate = Candidate::with('election.groups')->findOrFail($request->candidate_id);
         $election  = $candidate->election;
 
-        // Cek apakah user sudah voting untuk election ini
-        $existingVote = Vote::where('user_id', $user->id)
-            ->where('election_id', $election->id)
-            ->first();
-
-        if ($existingVote) {
+        if ($user->votes()->where('election_id', $election->id)->exists()) {
             return back()->with('error', 'Anda sudah melakukan voting.');
         }
 
-        // Pastikan user adalah bagian dari group election ini
-        $allowed = $election->groups->flatMap->users->contains('id', $user->id);
-        if (! $allowed) {
-            abort(403, 'Anda tidak memiliki akses ke voting ini.');
+        if (! $election->groups->flatMap->users->contains('id', $user->id)) {
+            abort(403, 'Akses voting ditolak.');
         }
 
-        // Enkripsi dan simpan vote
         $encryptedVote = RSAHelper::encryptWithPublicKey($candidate->id);
 
         Vote::create([
@@ -72,7 +76,7 @@ class VotingController extends Controller
             'encrypted_vote' => $encryptedVote,
         ]);
 
-        return redirect()->route('voter.voting.index')->with('success', 'Terima kasih telah melakukan voting!');
+        return redirect()->route('voter.voting.show', $request->election_id)->with('success', 'Voting berhasil!');
     }
 
     /**

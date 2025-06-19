@@ -24,7 +24,7 @@
                     <div>
                         <p class="font-medium text-gray-600">Waktu Voting:</p>
                         <p>{{ $vote->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') }}</p>
-                        <p class="mt-2 font-medium text-gray-600">voting:</p>
+                        <p class="mt-2 font-medium text-gray-600">Voting:</p>
                         <p>{{ $election->title }}</p>
                     </div>
                 </div>

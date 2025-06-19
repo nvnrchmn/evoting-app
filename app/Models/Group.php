@@ -11,11 +11,12 @@ class Group extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class, 'group_user');
     }
-
     public function elections()
     {
-        return $this->belongsToMany(Election::class);
+        return $this->belongsToMany(Election::class, 'election_group');
     }
+    // Group.php
+
 }

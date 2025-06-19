@@ -8,16 +8,16 @@ class Candidate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['election_id', 'vision', 'mission', 'photo'];
-
-    public function election()
-    {
-        return $this->belongsTo(Election::class);
-    }
+    // protected $fillable = ['election_id', 'vision', 'mission', 'photo'];
+    protected $fillable = ['election_id', 'name', 'vision', 'mission', 'photo'];
 
     public function persons()
     {
         return $this->hasMany(Person::class);
+    }
+    public function election()
+    {
+        return $this->belongsTo(Election::class);
     }
 
     public function votes()

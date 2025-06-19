@@ -8,31 +8,24 @@
             @csrf
 
             {{-- Judul --}}
-            <div class="mb-4">
-                <label for="title" class="block text-sm font-medium text-gray-700">Judul Voting</label>
-                <input type="text" name="title" id="title" required
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-200">
-            </div>
+            <x-form.label for="title" value="Judul Voting" />
+            <x-form.input name="title" required />
 
             {{-- Deskripsi --}}
-            <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                <textarea name="description" id="description" rows="3"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-200"></textarea>
-            </div>
+            <x-form.label for="description" value="Deskripsi" class="mt-4" />
+            <textarea name="description" id="description" rows="3"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-200"></textarea>
 
             {{-- Status --}}
-            <div class="mb-4">
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <select name="status" id="status"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-200">
-                    <option value="open">Open</option>
-                    <option value="closed">Closed</option>
-                </select>
-            </div>
+            <x-form.label for="status" value="Status" class="mt-4" />
+            <select name="status" id="status"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-200">
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+            </select>
 
-            {{-- Akses Group Voter --}}
-            <div class="mb-4">
+            {{-- Group Akses --}}
+            <div class="mt-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Akses untuk Group Voter</label>
                 <div class="space-y-2">
                     @forelse ($groups as $group)
@@ -47,11 +40,10 @@
                 </div>
             </div>
 
-            {{-- Tombol Aksi --}}
+            {{-- Tombol --}}
             <div class="mt-6 flex items-center">
-                <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ route('admin.elections.index') }}"
-                    class="ml-4 text-sm text-gray-600 hover:underline">Batal</a>
+                <x-primary-button dd >Simpan</x-primary-button>
+                <a href="{{ route('admin.elections.index') }}" class="ml-4 text-sm text-gray-600 hover:underline">Batal</a>
             </div>
         </form>
     </div>

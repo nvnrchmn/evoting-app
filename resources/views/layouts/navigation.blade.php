@@ -1,8 +1,8 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
+            <!-- Logo -->
             <div class="flex">
-                <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo"
@@ -10,7 +10,7 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Desktop Navigation -->
                 @if(Auth::check())
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -18,37 +18,10 @@
                         </x-nav-link>
 
                         @if(Auth::user()->role === 'voter')
-                            {{-- <x-nav-link :href="route('voter.voting.index')" :active="request()->routeIs('voter.voting.*')">
-                                {{ __('Voting') }}
-                            </x-nav-link> --}}
                             <x-nav-link :href="route('voter.elections.index')"
                                 :active="request()->routeIs('voter.elections.index')">
                                 {{ __('Voting Saya') }}
                             </x-nav-link>
-                            {{-- <x-nav-link>
-                                <div x-data="{ open: false }" class="relative items-center px-2 pt-3">
-                                    <button @click="open = !open" class="inline-flex items-center px-3 py-2">
-                                        voting Saya
-                                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    <div x-show="open" @click.away="open = false"
-                                        class="absolute mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                        <div class="py-1">
-                                            @forelse (auth()->user()->elections as $election)
-                                            <x-dropdown-link :href="route('voter.voting.index', ['election' => $election->id])">
-                                                {{ $election->title }}
-                                            </x-dropdown-link>
-                                            @empty
-                                            <div class="px-4 py-2 text-sm text-gray-500">Tidak ada voting</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                </div>
-                            </x-nav-link> --}}
                         @endif
 
                         @if(Auth::user()->role === 'admin')
@@ -57,7 +30,7 @@
                             </x-nav-link>
                             <x-nav-link :href="route('admin.candidates.index')"
                                 :active="request()->routeIs('admin.candidates.*')">
-                                {{ __('Candidate') }}
+                                {{ __('Candidates') }}
                             </x-nav-link>
                             <x-nav-link :href="route('admin.elections.index')"
                                 :active="request()->routeIs('admin.elections.*')">
@@ -68,7 +41,21 @@
                 @endif
             </div>
 
-            <!-- Settings Dropdown -->
+            <!-- Hamburger -->
+            <div class="-me-2 flex items-center sm:hidden">
+                <button @click="open = !open"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- User Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @if(Auth::check())
                     <x-dropdown align="right" width="48">
@@ -105,4 +92,54 @@
             </div>
         </div>
     </div>
+
+    <!-- Responsive Mobile Menu -->
+    <div :class="{ 'block': open, 'hidden': !open }" class="sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <!-- Dashboard -->
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            @auth
+                @if(Auth::user()->role === 'voter')
+                    <!-- Voter Menu -->
+                    <x-responsive-nav-link :href="route('voter.elections.index')"
+                        :active="request()->routeIs('voter.elections.index')">
+                        {{ __('Voting Saya') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if(Auth::user()->role === 'admin')
+                    <!-- Admin Menu -->
+                    <x-responsive-nav-link :href="route('admin.groups.index')" :active="request()->routeIs('admin.groups.*')">
+                        {{ __('Groups') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.candidates.index')"
+                        :active="request()->routeIs('admin.candidates.*')">
+                        {{ __('Candidates') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.elections.index')"
+                        :active="request()->routeIs('admin.elections.*')">
+                        {{ __('Elections') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                <!-- Profile -->
+                <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
+                    {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <!-- Logout -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <x-responsive-nav-link :href="route('logout')"
+                        onclick="event.preventDefault(); this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                </form>
+            @endauth
+        </div>
+    </div>
+
 </nav>
