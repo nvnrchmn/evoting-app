@@ -34,7 +34,7 @@ Aplikasi **E-Voting Berbasis Web** yang dibangun menggunakan Laravel 10. Aplikas
 1. **Clone repositori**
 
     ```bash
-    git clone https://github.com/username/evoting-app.git
+    git clone https://github.com/nvnrchmn/evoting-app.git
     cd evoting-app
     ```
 
